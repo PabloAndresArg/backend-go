@@ -5,6 +5,7 @@ import (
 	"log"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"fmt"
 )
 
 
@@ -50,16 +51,37 @@ func CreateP(w http.ResponseWriter , req * http.Request){
 	var p Persona
 	_ = json.NewDecoder(req.Body).Decode(&p)// decodifico como el objeto persona
 	personas = append(personas , p)
-	
+	// minuto 28 
 }
 
 
 func UpdateP(res http.ResponseWriter , req * http.Request){
-
+	var p Persona
+	_ = json.NewDecoder(req.Body).Decode(&p)// quine me trae todas las cosas es req 
+	parametros := mux.Vars(req)
+	for i, item := range personas{
+		if parametros["id"] == item.Id{
+			print("Persona: ")
+			fmt.Println(p)
+			personas[i] = p
+			break
+		} 
+	}
+	log.Println("update ok")
+	json.NewEncoder(res).Encode(personas)
 }
 
 func DeleteP(w http.ResponseWriter , req * http.Request){
-
+	params := mux.Vars(req)
+	for index , item := range personas{
+		if item.Id == params["id"]{
+			log.Println("persona eliminada")
+			personas = append(personas[:index] , personas[index+1:]...)
+			break
+		}
+	}
+	log.Println("no se encontro a la persona")
+	json.NewEncoder(w).Encode(personas)// devuelvo todas las personas para  visualizar
 }
 
 
@@ -71,15 +93,21 @@ func main(){
 	
 	//cargando al inicio el json 
 	personas= append(personas , Persona{Id: "1" , Nombre:"pablo" , Edad: 22 , Dir: &Direccion{Zona:"zona 4"}})
+	personas= append(personas , Persona{Id: "2" , Nombre:"val" , Edad: 21 , Dir: &Direccion{Zona:"zona 4"}})
+	personas= append(personas , Persona{Id: "3" , Nombre:"Random" , Edad: 25 , Dir: &Direccion{Zona:"zona 4"}})
+
+
 
 
 	// handlers 
-	router.HandleFunc("/personas", GetPersonas).Methods("GET") // le indico que cuando se haga un get a esta ruta , realice la funcion GetPersonas
+	router.HandleFunc("/", GetPersonas).Methods("GET") // le indico que cuando se haga un get a esta ruta , realice la funcion GetPersonas
 	// es un get pero con un parametro varibale llamado id
 	router.HandleFunc("/personas/{id}", getOnlyOnePerson).Methods("GET")
 	router.HandleFunc("/personas" , CreateP).Methods("POST") // metodos de peticion http
-	router.HandleFunc("/personas/{id}" , UpdateP).Methods("POST") // metodos de peticion http
-	router.HandleFunc("/personas/{id}" , DeleteP).Methods("POST") // metodos de peticion http
+	router.HandleFunc("/personas/{id}" , UpdateP).Methods("PUT") // metodos de peticion http
+	router.HandleFunc("/personas/{id}" , DeleteP).Methods("DELETE") // metodos de peticion http
 
+	fmt.Println("SERVER ESCUCHANDO EN EL PUERTO 3000")
 	log.Fatal(http.ListenAndServe(":3000",router))// le paso el puerto,enrutador
+	
 }
