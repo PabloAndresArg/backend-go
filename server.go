@@ -1,4 +1,5 @@
 package main
+// export PATH=$PATH:/usr/local/go/bin
 
 import (
 	"net/http"
@@ -7,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"fmt"
 )
-
+import "github.com/thecodingmachine/gotenberg-go-client/v7"
 
 
 // HAY QUE DEFINIR EL TIPO DE DATO QUE VAMOS A RECIBIR EN ESTE CASO UNA PERSONA
